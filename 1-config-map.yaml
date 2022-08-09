@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-configs
+  namespace: hw2
+data:
+  env: production
+  database.properties.host: otus-postgresql.postgres.svc.cluster.local
+  database.properties.port: "5432"

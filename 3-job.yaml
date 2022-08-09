@@ -1,0 +1,67 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: createdb
+spec:
+  template:
+    spec:
+      initContainers:
+        - name: createuser
+          image: bitnami/postgresql:latest
+          command:
+            - "sh"
+            - "-c"
+            - |
+              psql -U postgres -h $DATABASE_URI  <<'EOF'
+                CREATE DATABASE otusapp2_production;
+                \connect otusapp2_production
+                CREATE USER otusapp2 WITH ENCRYPTED PASSWORD '$(OTUSAPP2_DATABASE_PASSWORD)';
+                GRANT ALL PRIVILEGES ON DATABASE otusapp2_production to otusapp2;
+              EOF
+          env:
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: pg-secrets
+                  key: postgrespassword
+            - name: OTUSAPP2_DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: pg-secrets
+                  key: password
+            - name: DATABASE_URI
+              valueFrom:
+                configMapKeyRef:
+                  name: app-configs
+                  key: database.properties.host
+      containers:
+      - name: createdb
+        image: daslapovsky/otus:0.1.3
+        command:
+          - sh
+          - "-c"
+          - |
+            rails db:prepare <<'EOF'
+        env:
+          - name: RAILS_ENV
+            valueFrom:
+              configMapKeyRef:
+                name: app-configs
+                key: "env"
+          - name: POSTGRES_HOST
+            valueFrom:
+              configMapKeyRef:
+                name: app-configs
+                key: "database.properties.host"
+          - name: POSTGRES_PORT
+            valueFrom:
+              configMapKeyRef:
+                name: app-configs
+                key: "database.properties.port"
+          - name: OTUSAPP2_DATABASE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: pg-secrets
+                key: password
+      restartPolicy: Never
+  backoffLimit: 0

@@ -1,0 +1,6 @@
+global:
+  postgresql:
+    auth:
+      postgresPassword: "Password1!"
+# primary:
+#   configuration: "{'sharedBuffers': '500MB'}."
