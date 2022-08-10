@@ -6,6 +6,15 @@ spec:
   template:
     spec:
       initContainers:
+        - name: wait-postgres
+          image: busybox:1.28
+          command: ['sh', '-c', "until nslookup $(DATABASE_URI); do echo waiting for myservice; sleep 2; done"]
+          env:
+            - name: DATABASE_URI
+              valueFrom:
+                configMapKeyRef:
+                  name: app-configs
+                  key: database.properties.host
         - name: createuser
           image: bitnami/postgresql:latest
           command:
