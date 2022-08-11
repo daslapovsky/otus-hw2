@@ -1,0 +1,4 @@
+postgres:
+  name: otus
+  postgrespassword: UGFzc3dvcmQxIQ==
+  otususerpassword: b3R1c2FwcDI=
